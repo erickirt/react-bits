@@ -37,7 +37,7 @@ function injectPropsIntoCode(usageCode, props, defaultProps, componentName, demo
       typeof propValue === 'boolean' && propValue === true ? propName : `${propName}=${formattedValue}`;
 
     const simplePropRegex = new RegExp(
-      `(^[ \\t]*)(${propName})(?:=(?:"[^"\\n]*"|'[^'\\n]*'|\\{[^{}\\n]*\\}|[^\\s/>]+))?[ \\t]*$`,
+      `(^[ \\t]*)(${propName})(?:=(?:"[^"\\n]*"|'[^'\\n]*'|\\{[^{}\\n]*\\}|[^\\s/>]+))?[ \\t]*(\\r?\\n|$)`,
       'gm'
     );
 
@@ -46,13 +46,11 @@ function injectPropsIntoCode(usageCode, props, defaultProps, componentName, demo
 
     if (hasSimpleMatch) {
       let seen = false;
-      result = result
-        .replace(simplePropRegex, (_, indent) => {
-          if (seen) return '';
-          seen = true;
-          return `${indent}${newPropLine}`;
-        })
-        .replace(/\n{3,}/g, '\n\n');
+      result = result.replace(simplePropRegex, (_, indent, __, lineEnding) => {
+        if (seen) return '';
+        seen = true;
+        return `${indent}${newPropLine}${lineEnding}`;
+      });
       continue;
     }
 
