@@ -1,26 +1,28 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { LuX, LuRocket } from 'react-icons/lu';
+import { useLocation } from 'react-router-dom';
+import { LuX } from 'react-icons/lu';
+import { FiArrowRight } from 'react-icons/fi';
 import './AnnouncementModal.css';
 
-const STORAGE_KEY = 'rb-pro-launch-seen';
+const STORAGE_KEY = 'rb-pro-spring-sale-seen';
 const SHOW_DELAY = 1500;
-const IMAGE_CYCLE_INTERVAL = 5000;
-const IMAGES = ['/assets/rbp/components.webp', '/assets/rbp/blocks.webp'];
+const PROMO_IMAGE = '/assets/rbp/springdiscount.webp';
 
-const DISABLED = true;
+const DISABLED = false;
 
 const AnnouncementModal = () => {
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const modalRef = useRef(null);
   const previouslyFocusedElement = useRef(null);
 
   useEffect(() => {
     const hasSeenModal = localStorage.getItem(STORAGE_KEY);
 
-    if (hasSeenModal || DISABLED) return;
+    if (hasSeenModal || DISABLED || isLandingPage) return;
 
     const timer = setTimeout(() => {
       previouslyFocusedElement.current = document.activeElement;
@@ -28,7 +30,7 @@ const AnnouncementModal = () => {
     }, SHOW_DELAY);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isLandingPage]);
 
   useEffect(() => {
     if (isVisible && modalRef.current) {
@@ -37,14 +39,28 @@ const AnnouncementModal = () => {
   }, [isVisible]);
 
   useEffect(() => {
-    if (!isVisible || isClosing) return;
+    if (!isVisible) return;
 
-    const interval = setInterval(() => {
-      setCurrentImageIndex(prev => (prev + 1) % IMAGES.length);
-    }, IMAGE_CYCLE_INTERVAL);
+    const { body } = document;
+    const scrollY = window.scrollY;
+    const previousOverflow = body.style.overflow;
+    const previousPosition = body.style.position;
+    const previousTop = body.style.top;
+    const previousWidth = body.style.width;
 
-    return () => clearInterval(interval);
-  }, [isVisible, isClosing]);
+    body.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+
+    return () => {
+      body.style.overflow = previousOverflow;
+      body.style.position = previousPosition;
+      body.style.top = previousTop;
+      body.style.width = previousWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isVisible]);
 
   const handleDismiss = useCallback(() => {
     setIsClosing(true);
@@ -114,55 +130,53 @@ const AnnouncementModal = () => {
             aria-labelledby="announcement-modal-title"
             aria-describedby="announcement-modal-description"
             tabIndex={-1}
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.96, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, scale: 0.96, y: 16 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             onClick={e => e.stopPropagation()}
           >
-            <button className="announcement-modal-close" onClick={handleDismiss} aria-label="Close announcement">
-              <LuX size={20} />
-            </button>
+            <div className="announcement-modal-border" aria-hidden="true" />
 
-            <div className="announcement-modal-image">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={currentImageIndex}
-                  src={IMAGES[currentImageIndex]}
-                  alt="React Bits Pro Preview"
+            <div className="announcement-modal-card">
+              <button
+                className="announcement-modal-close"
+                onClick={handleDismiss}
+                aria-label="Close announcement"
+              >
+                <LuX size={16} />
+              </button>
+
+              <div className="announcement-modal-image">
+                <img
+                  src={PROMO_IMAGE}
+                  alt="React Bits Pro Spring Sale - 30% off with code SPRING30"
                   loading="lazy"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4 }}
                 />
-              </AnimatePresence>
-            </div>
-
-            <div className="announcement-modal-content">
-              <div className="announcement-modal-icon">
-                <LuRocket size={24} />
               </div>
 
-              <h2 id="announcement-modal-title" className="announcement-modal-title">
-                React Bits Pro just launched!
-              </h2>
+              <div className="announcement-modal-content">
+                <h2 id="announcement-modal-title" className="announcement-modal-title">
+                  Spring Sale is here!
+                </h2>
 
-              <p id="announcement-modal-description" className="announcement-modal-description">
-                85+ unique components, 100+ blocks, and 5 full page templates for building memorable products.
-              </p>
+                <p id="announcement-modal-description" className="announcement-modal-description">
+                  The April update adds 57 new animated UI blocks to the Pro library, bringing the total to 158+ blocks!
+                </p>
 
-              <a
-                href="https://pro.reactbits.dev"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="announcement-modal-cta"
-              >
-                Check It Out
-              </a>
+                <p id="announcement-modal-description" className="announcement-modal-description">
+                  Save 30% on React Bits Pro with code <strong>SPRING30</strong>
+                </p>
 
-              <div className="announcement-modal-highlight">
-                <span>🎉</span> Launch special: 25% off (limited time)
+                <a
+                  href="https://pro.reactbits.dev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="announcement-modal-btn announcement-modal-btn--primary"
+                  onClick={handleDismiss}
+                >
+                  Claim 30% Off <FiArrowRight size={14} />
+                </a>
               </div>
             </div>
           </motion.div>

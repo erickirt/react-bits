@@ -771,6 +771,91 @@
   box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
 }
 
+.pro-card-promo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid transparent;
+  text-align: center;
+  isolation: isolate;
+  animation: pro-card-promo-pulse 2.4s ease-in-out infinite;
+}
+
+.pro-card-promo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--pro-promo-angle, 0deg),
+    rgba(168, 85, 247, 0.15),
+    #c4a5ff,
+    #ff9ffc,
+    #c4a5ff,
+    rgba(168, 85, 247, 0.15)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: pro-card-promo-spin 4s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@property --pro-promo-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes pro-card-promo-spin {
+  to {
+    --pro-promo-angle: 360deg;
+  }
+}
+
+@keyframes pro-card-promo-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0);
+  }
+}
+
+.pro-card-promo-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #c4a5ff;
+}
+
+.pro-card-promo-text {
+  font-size: 11px;
+  color: var(--color-accent-muted);
+  letter-spacing: -0.2px;
+  line-height: 1.4;
+}
+
+.pro-card-promo-code {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(168, 85, 247, 0.25);
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+}
+
 /* ─── Sponsors Card ────────────────────────────────────────────────────────── */
 .sc-card {
   padding: 1em 1.25em;
